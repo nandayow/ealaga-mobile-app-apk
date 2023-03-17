@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  StatusBar,
 } from "react-native";
 
 // Shared
@@ -24,6 +25,12 @@ const VisitorViewContainer = (props) => {
         },
       ]}
     >
+       <StatusBar
+        backgroundColor= {Colors.main}
+        barStyle="dark-content"
+        translucent={false}
+        hidden={false}
+      />
       <View style={{ flex: 1, backgroundColor: "white" }} />
       <View style={[styles.Middlecontainer, { flex: 2 }]}>
         <Image

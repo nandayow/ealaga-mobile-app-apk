@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     // borderBottomWidth: 2,
     borderRadius: 20,
     alignItems: "center",
-    elevation: 30,
+    elevation: 4,
   },
   cover: {
     backgroundColor: Colors.rose_200,

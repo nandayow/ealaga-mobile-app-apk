@@ -528,9 +528,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   scrollView: {
-    margin: 5,
-    paddingBottom: 50,
-    backgroundColor: "transparent",
+    margin: 5, 
+    marginBottom:20,
+    paddingBottom: 70,
+    backgroundColor:Colors.main,
   },
 });
 export default HistoryCard;

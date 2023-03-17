@@ -1110,7 +1110,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 5,
     fontSize: 24,
-    fontWeight: "bold 200",
+    fontWeight: "400",
   },
   loading: {
     justifyContent: "center",

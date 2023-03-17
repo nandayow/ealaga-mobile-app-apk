@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useState } from "react";
 import {
   Dimensions,
   Image,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -151,6 +152,12 @@ function Credentials(props) {
 
   return (
     <SafeAreaProvider style={styles.container}>
+      <StatusBar
+        backgroundColor={Colors.main}
+        barStyle="dark-content"
+        translucent={false}
+        hidden={false}
+      />
       <Spinner
         //visibility of Overlay Loading Spinner
         visible={loading}
@@ -355,7 +362,7 @@ const styles = StyleSheet.create({
   },
   spinnerTextStyle: {
     color: "red",
-  }
+  },
 });
 
 export default Credentials;

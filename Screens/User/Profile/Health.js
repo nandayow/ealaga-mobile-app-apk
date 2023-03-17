@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useState } from "react";
 import {
   Dimensions,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -211,6 +212,12 @@ function Health(props) {
   };
   return (
     <SafeAreaProvider style={styles.container}>
+      <StatusBar
+        backgroundColor={Colors.main}
+        barStyle="dark-content"
+        translucent={false}
+        hidden={false}
+      />
       <Spinner
         //visibility of Overlay Loading Spinner
         visible={loading}

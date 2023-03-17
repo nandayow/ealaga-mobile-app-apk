@@ -21,8 +21,7 @@ import AuthGlobal from "../../Context/store/AuthGlobal";
 import {
   loginUser,
   setLoadingspinner,
-} from "../../Context/actions/Auth.actions";
-import { Platform } from "react-native";
+} from "../../Context/actions/Auth.actions"; 
 import { StatusBar } from "react-native";
 
 function LoginContainer(props) {
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: windowHeight,
     width: windowWidth,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     backgroundColor: Colors.main,
   },
 

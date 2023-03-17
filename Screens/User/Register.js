@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     height: windowHeight,
     maxWidth: windowWidth, 
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     backgroundColor:Colors.main
   },
   buttonGroup: {

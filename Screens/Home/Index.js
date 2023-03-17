@@ -85,8 +85,8 @@ const HomeContainer = (props,) => {
 const styles = StyleSheet.create({
   homecontainer: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    backgroundColor:Colors.main
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    // backgroundColor:Colors.red
   },
   container: {
     // width: windowWidth,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 24,
     fontStyle: "normal",
-    fontWeight: "500",
+    fontWeight: "400",
     marginLeft: 20,
     color: Colors.gray,
   },

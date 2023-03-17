@@ -31,8 +31,8 @@ const DonationsContainer = (props) => {
 const styles = StyleSheet.create({
   homecontainer: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    backgroundColor:Colors.main
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    // backgroundColor:Colors.main
   },
   container:{
       height:windowHeight,

@@ -251,7 +251,7 @@ const customStyle = {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center", 
-    marginBottom:40
+    marginBottom:40, 
   },
   card: {
     backgroundColor: Colors.light,

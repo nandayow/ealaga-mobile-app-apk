@@ -41,6 +41,7 @@ import InputModal from "../../../Shared/Form/InputModal";
 import FormContainerModal from "../../../Shared/Form/FormContainerModal";
 import SuperAlert from "react-native-super-alert";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "react-native";
 
 // Dimensions
 const windowWidth = Dimensions.get("window").width;
@@ -563,6 +564,12 @@ function Personal() {
         <RefreshControl refreshing={refresh} onRefresh={() => pullMe()} />
       }
     >
+      <StatusBar
+        backgroundColor={Colors.main}
+        barStyle="dark-content"
+        translucent={false}
+        hidden={false}
+      />
       <Spinner
         //visibility of Overlay Loading Spinner
         visible={loading}
@@ -867,19 +874,19 @@ function Personal() {
                 displayKey="name"
                 styleMainWrapper={{
                   backgroundColor: Colors.rose_200,
-                  width: "73%", 
+                  width: "73%",
                   borderRadius: 10,
                 }}
                 styleInputGroup={{
                   borderWidth: 1,
                   borderColor: Colors.gray,
-                  borderRadius: 10, 
+                  borderRadius: 10,
                   paddingLeft: 10,
                 }}
                 styleDropdownMenuSubsection={{
                   borderWidth: 1,
                   borderColor: Colors.gray,
-                  borderRadius: 10, 
+                  borderRadius: 10,
                   paddingLeft: 10,
                 }}
                 searchInputStyle={{
