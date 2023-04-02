@@ -56,7 +56,7 @@ function Credentials(props) {
       ) {
         props.navigation.navigate("User");
       }
-
+      setLoading(true);
       AsyncStorage.getItem("jwt")
         .then((res) => {
           axios
@@ -66,23 +66,19 @@ function Credentials(props) {
                 headers: { Authorization: `Bearer ${res}` },
               }
             )
-            .then(
-              (user) => setUserProfile(user.data),
-              setUsername(context.stateUser.user.username),
-              setEmail(context.stateUser.user.email),
-              setContactNumber(context.stateUser.user.phone),
-              setToken(res)
-            );
+            .then((user) => [
+              setUserProfile(user.data),
+              setUsername(user.data.user.user_name),
+              setEmail(user.data.user.email),
+              setContactNumber(user.data.user.phone),
+              setToken(res),
+              setLoading(false),
+            ]);
         })
         .catch((error) => console.log(error));
-
-      return () => {
-        setUserProfile();
-        // setUsername();
-      };
-    }, [context.stateUser.isAuthenticated])
+    }, [])
   );
-
+ 
   const UpdateProfile = () => {
     setLoading(true);
     let formData = new FormData();
@@ -217,7 +213,7 @@ function Credentials(props) {
           onChangeText={(text) => setUsername(text.toLowerCase())}
         />
 
-        {context.stateUser.user.phone === "" ? (
+        {phone === null || phone === undefined ? (
           <InputProfile
             placeholder={"Contact Number"}
             name={"phone"}
