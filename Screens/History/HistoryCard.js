@@ -24,12 +24,10 @@ import AuthGlobal from "../../Context/store/AuthGlobal";
 // Shared
 import Colors from "../../Shared/Color";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { useFocusEffect } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import FormContainerModal from "../../Shared/Form/FormContainerModal";
-
+import { useFocusEffect } from "@react-navigation/native"; 
 // Dimensions
 const windowheight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get("window").width;
 
 function HistoryCard(props) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -49,7 +47,7 @@ function HistoryCard(props) {
       ) {
         props.navigation.navigate("User");
       }
-
+      setRefresh(true)
       AsyncStorage.getItem("jwt")
         .then((res) => {
           axios
@@ -59,7 +57,7 @@ function HistoryCard(props) {
                 headers: { Authorization: `Bearer ${res}` },
               }
             )
-            .then((user) => setUserProfile(user.data), setToken(res));
+            .then((user) => [setUserProfile(user.data), setToken(res), setRefresh(false)]);
         })
         .catch((error) => console.log(error));
     }, [])
@@ -334,12 +332,12 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: Colors.main,
-    width: "90%",
-    height: 165,
-    margin: 10,
+    width: windowWidth/1.1,
+    height: "auto",
+    marginBottom: 10,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: "#c5c5c5",
+    borderColor: Colors.rose_200,
     elevation: 2,
     padding: 10,
   },
@@ -503,6 +501,7 @@ const styles = StyleSheet.create({
   },
   textareaContainer: {
     width: "auto",
+   
   },
   textArea: {
     height: 170,
@@ -514,7 +513,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     textAlign: "center",
     borderWidth: 2,
-    borderColor: "#c5c5c5",
+    borderColor:Colors.rose_200,
     borderRadius: 5,
     elevation: 2,
   },
@@ -529,7 +528,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     margin: 5, 
-    marginBottom:20,
+    marginBottom:40,
     paddingBottom: 70,
     backgroundColor:Colors.main,
   },

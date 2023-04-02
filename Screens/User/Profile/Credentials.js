@@ -9,11 +9,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Container, Input } from "native-base";
+import { Container } from "native-base";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import Spinner from "react-native-loading-spinner-overlay";
-
+import { TextInput } from "react-native-paper";
 // Color
 import Colors from "../../../Shared/Color";
 
@@ -44,6 +44,9 @@ function Credentials(props) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oldpasswordVisible, setOldPasswordVisible] = useState(true);
+  const [newpasswordVisible, setNewPasswordVisible] = useState(true);
+  const [confirmpasswordVisible, setConfirmPasswordVisible] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -82,72 +85,95 @@ function Credentials(props) {
 
   const UpdateProfile = () => {
     setLoading(true);
-    if (newPassword !== confirmPassword) {
-      setLoading(false);
-      Toast.show({
-        topOffset: 60,
-        type: "error",
-        text1: "Password Not Match",
-        text2: "Please try again",
-      });
-    } else if (phone === undefined) {
-      setLoading(false);
-      Toast.show({
-        topOffset: 60,
-        type: "error",
-        text1: "Kindly add you Contact Number",
-        text2: "Please try again",
-      });
+    let formData = new FormData();
+    if (
+      newPassword !== "" &&
+      confirmPassword !== "" &&
+      oldPassword !== "" &&
+      email !== "" &&
+      phone !== "" &&
+      user_name !== ""
+    ) {
+      if (newPassword !== confirmPassword) {
+        setLoading(false);
+        Toast.show({
+          topOffset: 60,
+          type: "error",
+          text1: "Password Not Match",
+          text2: "Please try again",
+        });
+      } else {
+        formData.append("user_name", user_name);
+        formData.append("phone", phone);
+        formData.append("email", email);
+        formData.append("oldPassword", oldPassword);
+        formData.append("newPassword", newPassword);
+        formData.append("confirmPassword", confirmPassword);
+      }
+    } else if (
+      newPassword === "" ||
+      confirmPassword === "" ||
+      oldPassword === ""
+    ) {
+      if (phone === "") {
+        setLoading(false);
+        Toast.show({
+          topOffset: 60,
+          type: "error",
+          text1: "Kindly add you Contact Number",
+          text2: "Please try again",
+        });
+      } else {
+        formData.append("user_name", user_name);
+        formData.append("phone", phone);
+        formData.append("email", email);
+        formData.append("oldPassword", "undefined");
+        formData.append("newPassword", "undefined");
+        formData.append("confirmPassword", "undefined");
+      }
     } else {
-      let formData = new FormData();
-      formData.append("user_name", user_name);
-      formData.append("phone", phone);
-      formData.append("email", email);
-      formData.append("oldPassword", oldPassword);
-      formData.append("newPassword", newPassword);
-      formData.append("confirmPassword", confirmPassword);
-
-      // console.log(formData);
-
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      // if (item !== null) {
-      axios
-        .put(
-          `${baseURL}users/profile/updateCredential/${context.stateUser.user.userId}`,
-          formData,
-          config
-        )
-        .then((res) => {
-          if (res.status == 200 || res.status == 201) {
-            setLoading(false);
-            Toast.show({
-              topOffset: 60,
-              type: "success",
-              text1: "Profile successfuly updated",
-              text2: "Great!",
-            });
-            setTimeout(() => {
-              props.navigation.navigate("Personal");
-            }, 500);
-          }
-        })
-        .catch((error) => {
+      Toast.show({
+        topOffset: 60,
+        type: "error",
+        text1: "Provide required Information",
+        text2: "Please try again",
+      });
+    }
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    axios
+      .put(
+        `${baseURL}users/profile/updateCredential/${context.stateUser.user.userId}`,
+        formData,
+        config
+      )
+      .then((res) => {
+        if (res.status == 200 || res.status == 201) {
           setLoading(false);
           Toast.show({
             topOffset: 60,
-            type: "error",
-            text1: "Something went wrong",
-            text2: "Please try again",
+            type: "success",
+            text1: "Profile successfuly updated",
+            text2: "Great!",
           });
+          setTimeout(() => {
+            props.navigation.navigate("Personal");
+          }, 500);
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        Toast.show({
+          topOffset: 60,
+          type: "error",
+          text1: "Something went wrong",
+          text2: "Please try again",
         });
-      // }
-    }
+      });
   };
 
   return (
@@ -191,7 +217,7 @@ function Credentials(props) {
           onChangeText={(text) => setUsername(text.toLowerCase())}
         />
 
-        {context.stateUser.user.phone === undefined ? (
+        {context.stateUser.user.phone === "" ? (
           <InputProfile
             placeholder={"Contact Number"}
             name={"phone"}
@@ -217,30 +243,71 @@ function Credentials(props) {
           onChangeText={(text) => setEmail(text.toLowerCase())}
         />
 
-        <InputProfile
+        <TextInput
+          style={[styles.input]}
           placeholder={"oldPassword"}
           name={"oldPassword"}
           id={"oldPassword"}
           value={oldPassword}
-          secureTextEntry={true}
+          underlineColor="transparent"
+          secureTextEntry={oldpasswordVisible}
+          theme={{ colors: { primary: Colors.main } }}
+          right={
+            oldPassword !== "" ? (
+              <TextInput.Icon
+                color={Colors.TextColor}
+                style={[styles.loginicon]}
+                name={oldpasswordVisible ? "eye-off" : "eye"}
+                onPress={() => setOldPasswordVisible(!oldpasswordVisible)}
+              />
+            ) : null
+          }
           onChangeText={(text) => setOldPassword(text.toLowerCase())}
         />
 
-        <InputProfile
+        <TextInput
+          style={[styles.input]}
           placeholder={"New Password"}
           name={"newPassword"}
           id={"newPassword"}
           value={newPassword}
-          secureTextEntry={true}
+          underlineColor="transparent"
+          secureTextEntry={newpasswordVisible}
+          theme={{ colors: { primary: Colors.main } }}
+          right={
+            newPassword !== "" ? (
+              <TextInput.Icon
+                color={Colors.TextColor}
+                style={[styles.loginicon]}
+                name={newpasswordVisible ? "eye-off" : "eye"}
+                onPress={() => setNewPasswordVisible(!newpasswordVisible)}
+              />
+            ) : null
+          }
           onChangeText={(text) => setNewPassword(text.toLowerCase())}
         />
 
-        <InputProfile
+        <TextInput
+          style={[styles.input]}
           placeholder={"Confirm Password"}
           name={"confirmPassword"}
           id={"confirmPassword"}
-          secureTextEntry={true}
+          underlineColor="transparent"
+          secureTextEntry={confirmpasswordVisible}
           value={confirmPassword}
+          theme={{ colors: { primary: Colors.main } }}
+          right={
+            confirmPassword !== "" ? (
+              <TextInput.Icon
+                color={Colors.TextColor}
+                style={[styles.loginicon]}
+                name={confirmpasswordVisible ? "eye-off" : "eye"}
+                onPress={() =>
+                  setConfirmPasswordVisible(!confirmpasswordVisible)
+                }
+              />
+            ) : null
+          }
           onChangeText={(text) => setConfirmPassword(text.toLowerCase())}
         />
         <View style={[styles.Lowercontainer, { flex: 3 }]}>
@@ -255,7 +322,7 @@ function Credentials(props) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.appButtonContainerRegister}
-              onPress={() => [UpdateProfile()]}
+              onPress={() => UpdateProfile()}
             >
               <Text style={styles.appButtonTextRegister}>Update</Text>
             </TouchableOpacity>
@@ -362,6 +429,23 @@ const styles = StyleSheet.create({
   },
   spinnerTextStyle: {
     color: "red",
+  },
+  loginicon: {
+    position: "absolute",
+    bottom: -15,
+  },
+  input: {
+    fontSize: 18,
+    width: "90%",
+    backgroundColor: Colors.main,
+    borderWidth: 1.5,
+    height: 40,
+    margin: 5,
+    paddingLeft: 20,
+    borderColor: Colors.underline,
+    borderRadius: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
 });
 

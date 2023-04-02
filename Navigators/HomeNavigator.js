@@ -10,10 +10,10 @@ import ScheduleContainer from "../Screens/Schedules/Index";
 
 const Stack = createStackNavigator();
 
-function HomeStack() {
+const HomeStack = () => {
   return (
     <Stack.Navigator
-    initialRouteName="home" 
+    // initialRouteName="home"
     >
       <Stack.Screen
         name="home"
@@ -58,6 +58,4 @@ function HomeStack() {
   );
 }
 
-export default function HomeNavigator() {
-  return <HomeStack />;
-}
+export default  HomeStack;

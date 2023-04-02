@@ -44,7 +44,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "react-native";
 
 // Dimensions
-const windowWidth = Dimensions.get("window").width;
+const windowWidth = Dimensions.get("window").width; 
+const windowHeight = Dimensions.get("window").height;
 function Personal() {
   const [isChecked1, setIsChecked1] = useState(false);
   const [isChecked2, setIsChecked2] = useState(false);
@@ -1065,28 +1066,20 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     textTransform: "uppercase",
   },
-  centeredView: {
+  centeredView: {  
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center",  
   },
   modalView: {
-    width: "90%",
-    height: "90%",
-    margin: 25,
+    width:windowWidth/1.1, 
+    height: windowHeight/1.025 ,
     backgroundColor: Colors.main,
     borderRadius: 20,
     padding: 30,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    alignItems: "center", 
     elevation: 5,
-    borderColor: "#c5c5c5",
+    borderColor: Colors.rose_200,
     borderWidth: 1,
   },
   infoedit: {

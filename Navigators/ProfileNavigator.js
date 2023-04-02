@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // Screens
 import ProfileInfoNavigator from "./ProfileInfoNavigator";
+import Colors from "../Shared/Color";
 
 const Stack = createNativeStackNavigator();
 
@@ -12,7 +13,7 @@ function ProfileStack() {
         name="ProfileInfo"
         component={ProfileInfoNavigator}
         options={{
-          title: "Profile Settings",
+          title: "Profile Settings", 
         }}
       />
     </Stack.Navigator>

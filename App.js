@@ -1,10 +1,9 @@
 import React from "react";
 import { NativeBaseProvider } from "native-base";
 import { NavigationContainer } from "@react-navigation/native";
-import { LogBox } from "react-native";
+import { LogBox, StatusBar } from "react-native";
 import Toast from "react-native-toast-message";
-import * as Notifications from "expo-notifications"; 
-import Spinner from "react-native-loading-spinner-overlay/lib";
+import * as Notifications from "expo-notifications";
 // Redux
 import { Provider } from "react-redux";
 import store from "./Redux/store";
@@ -12,8 +11,9 @@ import store from "./Redux/store";
 // Context API
 import Auth from "./Context/store/Auth";
 import MainNavigator from "./Navigators/MainNavigator";
+import Colors from "./Shared/Color";
 
-// Navigators 
+// Navigators
 
 LogBox.ignoreAllLogs(true);
 
@@ -31,7 +31,7 @@ export default function App() {
     content: {
       title: "eAlaga Reminders!!!",
       body: "Kndly Check your Schedule",
-      sound: require("./assets/notif.wav"), 
+      sound: require("./assets/notif.wav"),
     },
     trigger: {
       seconds: 2,
@@ -39,7 +39,7 @@ export default function App() {
     },
     android: {
       icon: require("./assets/notificon.png"),
-      channelId: 'default', // Required for Android 8+
+      channelId: "default", // Required for Android 8+
       sound: true,
       vibrate: true,
     },
@@ -49,9 +49,15 @@ export default function App() {
     <Auth>
       <Provider store={store}>
         <NativeBaseProvider>
+          <StatusBar
+            backgroundColor={Colors.main}
+            barStyle="dark-content"
+            translucent={false}
+            hidden={false}  
+          />
           <NavigationContainer>
             <MainNavigator />
-            <Toast /> 
+            <Toast />
           </NavigationContainer>
         </NativeBaseProvider>
       </Provider>

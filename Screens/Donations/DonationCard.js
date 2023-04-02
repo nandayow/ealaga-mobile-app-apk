@@ -1,11 +1,10 @@
-import React, { useCallback, useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   Dimensions,
   Image,
   Modal,
   RefreshControl,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,10 +12,6 @@ import {
 } from "react-native";
 import { Card } from "react-native-paper";
 import moment from "moment";
-import Toast from "react-native-toast-message";
-import Dialog from "react-native-dialog";
-
-import ViewShot from "react-native-view-shot";
 import SuperAlert from "react-native-super-alert";
 
 // Fething Data
@@ -32,6 +27,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 // Dimensions
 const windowheight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get("window").width;
 
 function DonationCard(props) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -52,14 +48,18 @@ function DonationCard(props) {
       ) {
         props.navigation.navigate("User");
       }
-
+      setRefresh(true);
       AsyncStorage.getItem("jwt")
         .then((res) => {
           axios
             .get(`${baseURL}donation/client/${context.stateUser.user.userId}`, {
               headers: { Authorization: `Bearer ${res}` },
             })
-            .then((user) => setMyDonations(user.data), setToken(res));
+            .then((user) => [
+              setMyDonations(user.data),
+              setToken(res),
+              setRefresh(false),
+            ]);
         })
         .catch((error) => console.log(error));
       return () => {
@@ -67,7 +67,6 @@ function DonationCard(props) {
       };
     }, [context.stateUser.isAuthenticated])
   );
-  // console.log(mydonations && mydonations.donation.length);
 
   // Populating Data from database
   const donations = mydonations && mydonations.donation;
@@ -93,8 +92,6 @@ function DonationCard(props) {
       setMyDonations();
     };
   };
-
-  // console.log(category)
 
   return (
     <View>
@@ -161,8 +158,10 @@ function DonationCard(props) {
                         setQty(donation.quantity),
                       ]}
                     >
-                      <Icon name="eye" style={styles.iconStar} size={20} />
-                      <Text style={styles.iconlabel}>View</Text>
+                      <Icon name="eye" style={styles.iconStar} size={20}>
+                        {" "}
+                        View
+                      </Icon>
                     </TouchableOpacity>
                   </View>
                 </Card>
@@ -175,43 +174,41 @@ function DonationCard(props) {
           )}
         </View>
       </ScrollView>
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.header}>
-            <Text style={styles.headertitle}>Donation</Text>
+      <View style={styles.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.headertitle}>Donation</Text>
+              <View style={{ marginBottom: 10 }}>
+                <Image
+                  source={{
+                    uri: donationImage,
+                  }}
+                  resizeMode="cover"
+                  style={styles.ModalImage}
+                />
+                <Text style={styles.Modalcategory}>{category}</Text>
+                <Text style={styles.Modalcategory}>Quantity : {qty}</Text>
+              </View>
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.closebutton}
+                  onPress={() => [setModalVisible(false)]}
+                >
+                  <Text style={styles.closebuttonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-
-          <View style={styles.modalBody}>
-            <Image
-              source={{
-                uri: donationImage,
-              }}
-              resizeMode="cover"
-              style={styles.ModalImage}
-            />
-            <Text style={styles.Modalcategory}>{category}</Text>
-            <Text style={styles.Modalcategory}>Quantity : {qty}</Text>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setModalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
+        </Modal>
+      </View>
       <SuperAlert customStyle={customStyle} />
     </View>
   );
@@ -250,17 +247,17 @@ const customStyle = {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center", 
-    marginBottom:40, 
+    alignItems: "center",
+    marginBottom: 40,
   },
   card: {
     backgroundColor: Colors.light,
-    width: "90%",
-    height: 190,
-    margin: 10,
+    width: windowWidth / 1.1,
+    height: "auto",
+    marginBottom: 10,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: "#c5c5c5",
+    borderColor: Colors.rose_200,
     elevation: 2,
     padding: 10,
   },
@@ -302,54 +299,48 @@ const styles = StyleSheet.create({
   iconStar: {
     color: Colors.TextColor,
     backgroundColor: Colors.light,
-  },
-  iconlabel: {
     fontSize: 16,
-    fontStyle: "normal",
-    position: "absolute",
-    right: 10,
-    color: "red",
-    fontWeight: "900",
-    backgroundColor: Colors.light,
   },
+
   centeredView: {
-    alignItems: "center",
-    marginTop: 120,
-    marginBottom: 10,
-    width: "90%",
-    minHeight: 450,
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 5,
-    backgroundColor: Colors.main,
-  },
-  header: {
-    backgroundColor: "#D03043",
-    width: "100%",
-    height: 50,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 22,
   },
-  modalBody: {
-    flex: 1,
-    // backgroundColor:Colors.red,
+
+  modalView: {
+    backgroundColor: Colors.main,
+    borderRadius: 10,
+    width: windowWidth / 1.09,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: Colors.rose_200,
+  },
+
+  headertitle: {
+    fontSize: 18,
+    height: 50,
     width: "100%",
-    alignItems: "center",
+    color: Colors.TextWhite,
+    fontWeight: "bold",
+    backgroundColor: "#D03043",
+    textAlign: "center",
+    textAlignVertical: "center",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
+
   footer: {
     backgroundColor: "#ffbaba80",
     width: "100%",
     height: 70,
     justifyContent: "center",
     alignItems: "center",
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
-  headertitle: {
-    fontSize: 18,
-    color: Colors.TextWhite,
-    fontWeight: "500",
-  },
+
   closebutton: {
     backgroundColor: "#EF3A47",
     borderWidth: 2,
@@ -368,13 +359,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   viewButton: {
-    width: 85,
-    borderWidth: 1.5,
-    borderColor: "red",
+    width: "auto",
     position: "absolute",
     right: 0,
     padding: 10,
-    bottom: 1,
     justifyContent: "center",
     borderRadius: 10,
   },
@@ -384,7 +372,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   ModalImage: {
-    height: "70%",
+    height: 200,
     width: "90%",
     alignSelf: "center",
     marginTop: 10,
@@ -397,6 +385,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderWidth: 0.5,
     padding: 5,
+    alignSelf: "center",
   },
 });
 export default DonationCard;

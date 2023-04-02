@@ -10,7 +10,7 @@ import ProfileNavigator from "./ProfileNavigator";
 
 // Auth
 import AuthGlobal from "../Context/store/AuthGlobal";
-import AboutContainer from "../Screens/About/Index"; 
+import AboutContainer from "../Screens/About/Index";
 const Tab = createBottomTabNavigator();
 
 const MainNavigator = () => {
@@ -18,17 +18,17 @@ const MainNavigator = () => {
 
   return (
     <Tab.Navigator
-      initialRouteName="Home" 
+      initialRouteName="Home"
       screenOptions={{
-        tabBarActiveTintColor: "#e91e63",
+        tabBarActiveTintColor: "red",
         tabBarInactiveTintColor: "gray",
-        tabBarShowLabel: true,
-        tabBarStyle: [
-          {
-            display: "flex",
-          },
-          null,
-        ],
+        tabBarStyle: {
+          borderTopWidth: 1,
+          height: 60,
+        },
+        tabBarLabelStyle: {
+          fontSize: 16,
+        },
       }}
     >
       {context.stateUser.isAuthenticated === true ? (
@@ -36,7 +36,7 @@ const MainNavigator = () => {
           name="About"
           component={AboutContainer}
           options={{
-            headerShown: false, 
+            headerShown: false,
             tabBarIcon: ({ color }) => (
               <Icon name="info" color={color} size={30} />
             ),
@@ -46,7 +46,16 @@ const MainNavigator = () => {
       {context.stateUser.isAuthenticated === true ? (
         <Tab.Screen
           name="Home"
-          component={HomeNavigator} 
+          component={HomeNavigator}
+          listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+              // prevent default behavior
+              e.preventDefault();
+
+              // reset stack navigator to initial route
+              navigation.navigate(route.name, { screen: "home" });
+            },
+          })}
           options={{
             headerShown: false,
             tabBarIcon: ({ color }) => (

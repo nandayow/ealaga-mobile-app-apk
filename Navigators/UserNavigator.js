@@ -16,7 +16,7 @@ function UserStack() {
         name="Visitor"
         component={VisitorViewContainer}
         options={{
-          headerShown: false,
+          headerShown: false, 
         }}
       />
 

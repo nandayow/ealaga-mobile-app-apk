@@ -1,7 +1,5 @@
 import { ScrollView } from "native-base";
 import React, { useState } from "react";
-import { Platform } from "react-native";
-import { StatusBar } from "react-native";
 import {
   Animated,
   Dimensions,
@@ -20,7 +18,6 @@ import Header from "../../Shared/Header";
 
 // Dimensions
 const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
 
 const AboutContainer = (props) => {
   const [modalVisible, setModalVisible] = useState(true);
@@ -48,21 +45,17 @@ const AboutContainer = (props) => {
         <View style={styles.imagecontainer}>
           <Animated.Image
             source={require("../../assets/center.png")}
-            style={[
-              styles.imahe,
-              {  bottom: position },
-            ]}
-             
+            style={[styles.imahe, { bottom: position }]}
           />
         </View>
         <Text style={styles.title}>Taguig City Center for the Elderly</Text>
 
         <Text style={styles.description}>
           The five-storey wellness hub for Taguigeño senior citizens was opened
-          last April 2019, and features a therapy pool, a massage room, two saunas, a
-          yoga room, a gym, and cinema for relaxation purposes. It also comes
-          with a dialysis center and a
-          multi-purpose hall for city programs and recreational activities.
+          last April 2019, and features a therapy pool, a massage room, two
+          saunas, a yoga room, a gym, and cinema for relaxation purposes. It
+          also comes with a dialysis center and a multi-purpose hall for city
+          programs and recreational activities.
         </Text>
         <Text style={styles.title1}>Organizations</Text>
         <View style={styles.rowcontainer}>
@@ -108,7 +101,7 @@ const AboutContainer = (props) => {
         }}
       >
         <View style={styles.centeredView}>
-          <View style={styles.modalBody}>
+          <View style={styles.modalView}>
             <Image
               source={require("../../assets/giphy.gif")}
               resizeMode="contain"
@@ -118,15 +111,14 @@ const AboutContainer = (props) => {
             <Text style={styles.subheader}>
               You have successfully logged in
             </Text>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setModalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Ok</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setModalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Ok</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -138,7 +130,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.main,
-    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, 
+    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   title: {
     textAlign: "center",
@@ -172,7 +164,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  rowcontainer: { 
+  rowcontainer: {
     flex: 1,
     flexDirection: "row",
     // backgroundColor: '#1f2041',
@@ -207,23 +199,19 @@ const styles = StyleSheet.create({
     // borderRadius:100
   },
   centeredView: {
-    alignItems: "center",
-    width: "90%",
-    // minHeight: 300,
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 10,
-    backgroundColor: Colors.main,
-    position: "absolute",
-    bottom: 200,
-  },
-  modalBody: {
     flex: 1,
-    width: "100%",
+    justifyContent: "center",
     alignItems: "center",
+    marginTop: 50,
+    marginBottom: 50,
+  },
+  modalView: {
+    backgroundColor: Colors.main,
     borderRadius: 10,
+    width: windowWidth / 1.09,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: Colors.rose_200,
   },
   image: {
     height: 250,
@@ -243,6 +231,13 @@ const styles = StyleSheet.create({
     color: Colors.gray,
     fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
+    padding: 10,
+  },
+  subheader: {
+    textAlign: "center",
+    fontSize: 18,
+    padding: 10,
   },
   closebutton: {
     backgroundColor: "#EF3A47",

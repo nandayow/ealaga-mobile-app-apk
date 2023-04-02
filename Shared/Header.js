@@ -1,17 +1,10 @@
-import React, { useContext } from "react";
-import { StyleSheet, Image, View, StatusBar } from "react-native";
+import React from "react";
+import { StyleSheet, Image, View } from "react-native";
 import Colors from "./Color";
 
 const Header = () => {
   return (
-    <View style={styles.header}>
-      <StatusBar
-        backgroundColor= {Colors.main}
-        barStyle="dark-content"
-        translucent={false}
-        hidden={false}
-      />
-
+    <View style={styles.header}> 
       <Image
         source={require("../assets/ealaga.png")}
         resizeMode="contain"
@@ -22,8 +15,8 @@ const Header = () => {
 };
 
 const styles = StyleSheet.create({
-  header: { 
-    width: "100%", 
+  header: {
+    width: "100%",
     alignContent: "center",
     justifyContent: "center",
     borderBottomWidth: 3.5,
@@ -32,14 +25,8 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 70,
-    width: "100%",
-    // marginTop:15,
+    width: "100%", 
     alignSelf: "center",
-  },
-  touchableOpacity: {
-    position: "absolute",
-    left: 10,
-    bottom: 1,
   },
 });
 export default Header;

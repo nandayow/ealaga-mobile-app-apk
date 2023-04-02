@@ -3,10 +3,9 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
-  Image,
-  Dimensions,
-  StatusBar,
+  TouchableOpacity, 
+  Dimensions, 
+  Animated,
 } from "react-native";
 
 // Shared
@@ -16,6 +15,24 @@ import Colors from "../../Shared/Color";
 const windowWidth = Dimensions.get("window").width;
 
 const VisitorViewContainer = (props) => {
+
+  const position = new Animated.Value(0);
+
+  Animated.loop(
+    Animated.sequence([
+      Animated.timing(position, {
+        toValue: 10,
+        duration: 1000,
+        useNativeDriver: false,
+      }),
+      Animated.timing(position, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: false,
+      }),
+    ])
+  ).start();
+
   return (
     <View
       style={[
@@ -24,29 +41,26 @@ const VisitorViewContainer = (props) => {
           flexDirection: "column",
         },
       ]}
-    >
-       <StatusBar
-        backgroundColor= {Colors.main}
-        barStyle="dark-content"
-        translucent={false}
-        hidden={false}
-      />
+    > 
       <View style={{ flex: 1, backgroundColor: "white" }} />
       <View style={[styles.Middlecontainer, { flex: 2 }]}>
-        <Image
-          source={require("../../assets/favicon.png")}
-          style={{ width: 90, height: 90 }}
+        <Animated.Image
+          source={require("../../assets/icon.png")}
+          style={[
+            styles.imahe,
+            {  bottom: position },
+          ]}
         />
-        <Image
+        <Animated.Image
           source={require("../../assets/ealaga.png")}
-          style={{ width: 200, height: 100 }}
+          style={{ width: 200, height: 100 , bottom: position }}
         />
       </View>
       <View style={[styles.Lowercontainer, { flex: 3 }]}>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.appButtonContainerLogin}
-            onPress={() => props.navigation.navigate("Login")} 
+            onPress={() => props.navigation.navigate("Login")}
           >
             <Text style={styles.appButtonTextLogin}>LOG IN</Text>
           </TouchableOpacity>
@@ -134,5 +148,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#fff",
   },
+  imahe:{
+    width: 100,
+    height: 100,
+  }
 });
 export default VisitorViewContainer;

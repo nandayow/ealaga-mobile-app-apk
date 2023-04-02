@@ -26,7 +26,6 @@ import axios from "axios";
 import baseURL from "../../assets/common/baseUrl";
 import Spinner from "react-native-loading-spinner-overlay/lib";
 import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Dimensions
 const windowWidth = Dimensions.get("window").width;
@@ -50,20 +49,43 @@ function ServiceProgressSteps(props) {
   const [service, setService] = useState();
   const [category_time, setCategory_time] = useState();
   const [requirementlist, setRequirementList] = useState();
-
+  const [first_name, setFirstName] = useState();
   // Dates
   const [selectedDate, setSelectedDate] = useState(null);
   const today = moment(new Date()).format("yyyy-MM-DD");
   const markedWeekends = {};
   const [existingDates, setExistingDates] = useState();
+  const [existingmpham, setExistingmpham] = useState();
+  const [existingmphpm, setExistingmphpm] = useState();
+  const [existingmphwholeday, setExistingmphwholeday] = useState();
+  const [slot_recreational_am, setSlot_recreational_am] = useState();
+  const [slot_recreational_pm, setSlot_recreational_pm] = useState();
+  const [slot_dialysis_am, setslot_dialysis_am] = useState();
+  const [slot_dialysis_pm, setslot_dialysis_pm] = useState();
 
   var d = new Date();
   var getTot = (d.getMonth(), d.getFullYear()); //Get total days in a month
   var sat = new Array(); //Declaring array for inserting Saturdays
   var sun = new Array(); //Declaring array for inserting Sundays
   var existingDate = new Array(); //Declaring array for existing date in calendar
+  var existingDatempham = new Array(); //Declaring array for existing mph am date in calendar
+  var existingDatemphpm = new Array(); //Declaring array for existing mph pm date in calendar
+  var existingDatemphwholeday = new Array(); //Declaring array for existing whole am date in calendar
+  var SlotsDateam = new Array(); //Declaring array for  existing 0  am date in calendar
+  var SlotsDatepm = new Array(); //Declaring array for  existing 0  pm date in calendar
+  var SlotsDateamDialysis = new Array(); //Declaring array for  existing 0  am date in calendar
+  var SlotsDatepmDialysis = new Array(); //Declaring array for  existing 0  am date in calendar
+  var SlotsZero = new Array(); //Declaring array for  0 slots date in calendar
+
+  const [isamVisible, setamIsVisible] = useState(true);
+  const [ispmVisible, setpmIsVisible] = useState(true);
+
+  const [ismphamVisible, setmphamIsVisible] = useState(true);
+  const [ismphpmVisible, setmphpmIsVisible] = useState(true);
+  const [iswholedayVisible, setwholedayIsVisible] = useState(true);
 
   // Getting Exisitng Dates
+
   useFocusEffect(
     useCallback(() => {
       if (
@@ -73,46 +95,179 @@ function ServiceProgressSteps(props) {
         props.navigation.navigate("User");
       }
 
-      AsyncStorage.getItem("jwt")
-        .then((res) => {
-          axios
-            .get(
-              `${baseURL}schedule/activity/${context.stateUser.user.userId}`,
-              {
-                headers: { Authorization: `Bearer ${res}` },
-              }
-            )
-            .then((user) => setExistingDates(user.data));
-        })
-        .catch((error) => console.log(error));
+      setLoading(true);
+      const requests = [
+        axios.get(
+          `${baseURL}schedule/schedule/${context.stateUser.user.userId}`
+        ),
+        axios.get(
+          `${baseURL}users/profile/edit/${context.stateUser.user.userId}`
+        ),
+        axios.get(
+          `${baseURL}schedule/activity/${context.stateUser.user.userId}`
+        ),
+      ];
 
-      AsyncStorage.getItem("jwt")
-        .then((res) => {
-          axios
-            .get(
-              `${baseURL}users/profile/edit/${context.stateUser.user.userId}`,
-              {
-                headers: { Authorization: `Bearer ${res}` },
-              }
-            )
-            .then((user) => setRequirementList(user.data.user.requirement_id));
+      Promise.all(requests)
+        .then((responses) => {
+          const [schedule, profile, activity] = responses;
+
+          setExistingmpham(schedule.data.userMultipurposeSchedAm);
+          setExistingmphpm(schedule.data.userMultipurposeSchedPm);
+          setExistingmphwholeday(schedule.data.userMultipurposeSchedWhole);
+          setSlot_recreational_am(schedule.data.slot_recreational_am);
+          setSlot_recreational_pm(schedule.data.slot_recreational_pm);
+          setslot_dialysis_am(schedule.data.slot_dialysis_am);
+          setslot_dialysis_pm(schedule.data.slot_dialysis_pm);
+
+          setRequirementList(profile.data.user.requirement_id);
+          setFirstName(profile.data.user.first_name);
+          setExistingDates(activity.data);
+
+          setLoading(false);
         })
-        .catch((error) => console.log(error));
+        .catch((error) => {
+          console.log(error);
+          setLoading(false);
+        });
     }, [])
   );
 
-  const passExisitngDates = existingDates && existingDates.filter; 
+  // Existing Date
+  const passExisitngDates = existingDates && existingDates.filter;
   if (existingDates && existingDates.filter.length > 0) {
     passExisitngDates.map((schedule) => {
       existingDate.push(moment(schedule.date_schedule).format("yyyy-MM-DD"));
     });
+
+    existingDate.forEach((val) => {
+      markedWeekends[val] = {
+        disabled: true,
+      };
+    });
   }
 
-  existingDate.forEach((val) => {
-    markedWeekends[val] = {
-      disabled: true,
-    };
-  });
+  // Check available slots
+
+  if (service === "Recreational Activity") {
+    // AM
+    const passslot_recreational_am =
+      slot_recreational_am && slot_recreational_am;
+    if (slot_recreational_am && slot_recreational_am.length > 0) {
+      const filteredArray = passslot_recreational_am.filter((element) => {
+        return element.avaliableSlot === 0;
+      });
+
+      filteredArray.map((slots) => {
+        let dateObject = slots.date;
+        const parts = dateObject.split("/");
+        const yyyyMMdd = `${parts[2]}-${parts[0].padStart(
+          2,
+          "0"
+        )}-${parts[1].padStart(2, "0")}`;
+        SlotsZero.push(yyyyMMdd);
+        SlotsDateam.push(yyyyMMdd);
+      });
+    }
+    // PM
+    const passslot_recreational_pm =
+      slot_recreational_pm && slot_recreational_pm;
+    if (slot_recreational_pm && slot_recreational_pm.length > 0) {
+      const filteredArray = passslot_recreational_pm.filter((element) => {
+        return element.avaliableSlot === 0;
+      });
+
+      filteredArray.map((slots) => {
+        let dateObject = slots.date;
+        const parts = dateObject.split("/");
+        const yyyyMMdd = `${parts[2]}-${parts[0].padStart(
+          2,
+          "0"
+        )}-${parts[1].padStart(2, "0")}`;
+
+        SlotsZero.push(yyyyMMdd);
+        SlotsDatepm.push(yyyyMMdd);
+      });
+    }
+    // SlotsZero.forEach((val) => {
+    //   markedWeekends[val] = {
+    //     disabled: true,
+    //   };
+    // });
+  }
+
+  if (service === "Multipurpose Hall") {
+    // // Whole Day
+    const passExisitngDatesmphwholeday =
+      existingmphwholeday && existingmphwholeday;
+    if (existingmphwholeday && existingmphwholeday.length > 0) {
+      passExisitngDatesmphwholeday.map((schedule) => {
+        existingDatemphwholeday.push(moment(schedule).format("yyyy-MM-DD"));
+      });
+
+      existingDatemphwholeday.forEach((val) => {
+        let dateObject = moment(new Date(val)).format("yyyy-MM-DD"); // Creating a new Date object by passing the date string as argument
+        markedWeekends[dateObject] = {
+          disabled: true,
+        };
+      });
+    }
+
+    // Morning MPH
+    const passExisitngDatesmpham = existingmpham && existingmpham;
+    if (existingmpham && existingmpham.length > 0) {
+      passExisitngDatesmpham.map((schedule) => {
+        existingDatempham.push(moment(schedule).format("yyyy-MM-DD"));
+      });
+    }
+
+    // PM MPH
+    const passExisitngDatesmphpm = existingmphpm && existingmphpm;
+    if (existingmphpm && existingmphpm.length > 0) {
+      passExisitngDatesmphpm.map((schedule) => {
+        existingDatemphpm.push(moment(schedule).format("yyyy-MM-DD"));
+      });
+    }
+  }
+
+  if (service === "Dialysis") {
+    // AM DIALAYIS
+    const passslot_dialysis_am = slot_dialysis_am && slot_dialysis_am;
+    if (slot_dialysis_am && slot_dialysis_am.length > 0) {
+      const filteredArray = passslot_dialysis_am.filter((element) => {
+        return element.avaliableSlot === 0;
+      });
+
+      filteredArray.map((slots) => {
+        let dateObject = slots.date;
+        const parts = dateObject.split("/");
+        const yyyyMMdd = `${parts[2]}-${parts[0].padStart(
+          2,
+          "0"
+        )}-${parts[1].padStart(2, "0")}`;
+        SlotsZero.push(yyyyMMdd);
+        SlotsDateamDialysis.push(yyyyMMdd);
+      });
+    }
+    // PM DIALYSIS
+    const passslot_dialysis_apm = slot_dialysis_pm && slot_dialysis_pm;
+    if (slot_dialysis_pm && slot_dialysis_pm.length > 7) {
+      const filteredArray = passslot_dialysis_apm.filter((element) => {
+        return element.avaliableSlot === 0;
+      });
+
+      filteredArray.map((slots) => {
+        let dateObject = slots.date;
+        const parts = dateObject.split("/");
+        const yyyyMMdd = `${parts[2]}-${parts[0].padStart(
+          2,
+          "0"
+        )}-${parts[1].padStart(2, "0")}`;
+        SlotsZero.push(yyyyMMdd);
+        SlotsDatepmDialysis.push(yyyyMMdd);
+      });
+    }
+  }
 
   // ....
 
@@ -148,14 +303,15 @@ function ServiceProgressSteps(props) {
   // ...
 
   const newToday = moment(today).format("yyyy-MM-DD");
+  markedWeekends[newToday] = {
+    disabled: true,
+  };
 
-  if (selectedDate === null) {
-    markedWeekends[newToday] = {
-      selected: true,
-      selectedColor: Colors.rose_200,
-      disabled: true,
-    };
-  }
+  // Starting Day
+  let Datetoday = new Date(); // create a new Date object for today's date
+  let tomorrow = new Date(); // create a new Date object for tomorrow's date
+  tomorrow.setDate(Datetoday.getDate() + 1); // set tomorrow's date by adding one day to today's date
+  const minTom = moment(tomorrow).format("yyyy-MM-DD");
 
   // Modals
   const [recreationalmodalVisible, setRecreationalmodalVisible] =
@@ -166,6 +322,7 @@ function ServiceProgressSteps(props) {
   const [servicesmodalVisible, setServicesmodalVisible] = useState(false);
   const [reqmodalVisible, setReqmodalVisible] = useState(false);
   const [mphmodalVisible, setMphmodalVisible] = useState(false);
+  const [isReminderVisible, setReminderVisible] = useState(false);
 
   const buttonTextStyle = {
     color: "red",
@@ -175,11 +332,88 @@ function ServiceProgressSteps(props) {
     setSelectedDate(day.dateString);
 
     if (service === "Recreational Activity") {
-      setRecreationalmodalVisible(true);
+      if (
+        SlotsDateam.includes(day.dateString) === true &&
+        SlotsDatepm.includes(day.dateString) === true
+      ) {
+        alert(
+          `Hi, ${first_name}`, // This is a title
+          "Sorry the selected date is not Available. Kindly select another Date.", // This is a alert message
+          {
+            type: "flashmessage",
+            option: "danger",
+            timeout: 5,
+          }
+        );
+      } else if (
+        SlotsDateam.includes(day.dateString) === false &&
+        SlotsDatepm.includes(day.dateString) === true
+      ) {
+        setpmIsVisible(false);
+        setamIsVisible(true);
+        setRecreationalmodalVisible(true);
+      } else if (
+        SlotsDateam.includes(day.dateString) === true &&
+        SlotsDatepm.includes(day.dateString) === false
+      ) {
+        setpmIsVisible(true);
+        setamIsVisible(false);
+        setRecreationalmodalVisible(true);
+      } else {
+        setpmIsVisible(true);
+        setamIsVisible(true);
+        setRecreationalmodalVisible(true);
+      }
     } else if (service === "Multipurpose Hall") {
+      // Check if selected date exist in multi-purpose am
+      if (existingDatempham.includes(day.dateString) === true) {
+        setmphamIsVisible(false);
+        setmphpmIsVisible(true);
+        setwholedayIsVisible(false);
+      } else if (existingDatemphpm.includes(day.dateString) === true) {
+        setmphamIsVisible(true);
+        setmphpmIsVisible(false);
+        setwholedayIsVisible(false);
+      } else {
+        setmphamIsVisible(true);
+        setmphpmIsVisible(true);
+        setwholedayIsVisible(true);
+      }
+      // ....
       setMultipurposemodalVisible(true);
     } else {
-      setDialysismodalVisible(true);
+      if (
+        SlotsDateamDialysis.includes(day.dateString) === true &&
+        SlotsDatepmDialysis.includes(day.dateString) === true
+      ) {
+        alert(
+          `Hi, ${first_name}`, // This is a title
+          "Sorry the selected date is not Available. Kindly select another Date.", // This is a alert message
+          {
+            type: "flashmessage",
+            option: "danger",
+            timeout: 5,
+          }
+        );
+      } else if (
+        SlotsDateamDialysis.includes(day.dateString) === true &&
+        SlotsDatepmDialysis.includes(day.dateString) === false
+      ) {
+        setamIsVisible(false);
+        setpmIsVisible(true);
+        setDialysismodalVisible(true);
+      } else if (
+        SlotsDateamDialysis.includes(day.dateString) === false &&
+        SlotsDatepmDialysis.includes(day.dateString) === true
+      ) {
+        setamIsVisible(true);
+        setpmIsVisible(false);
+        setDialysismodalVisible(true);
+      } else {
+        setamIsVisible(true);
+        setpmIsVisible(true);
+        setDialysismodalVisible(true);
+      }
     }
   };
 
@@ -220,7 +454,7 @@ function ServiceProgressSteps(props) {
               text2: "Great!",
             });
             setLoading(false);
-            props.navigation.navigate("Schedules");
+            setReminderVisible(true);
           } else {
             setLoading(false);
             Toast.show({
@@ -398,7 +632,7 @@ function ServiceProgressSteps(props) {
               //   [selectedDate]: { selected: true, selectedColor: "red" },
               // }}
               markedDates={markedWeekends}
-              minDate={today}
+              minDate={minTom}
               disableAllTouchEventsForDisabledDays={true}
             />
           </View>
@@ -411,60 +645,59 @@ function ServiceProgressSteps(props) {
         animationType="fade"
         transparent={true}
         visible={recreationalmodalVisible}
-        style={styles.modalView}
         onRequestClose={() => {
           setRecreationalmodalVisible(false);
         }}
       >
         <View style={styles.centeredView}>
-          <View style={styles.header}>
+          <View style={styles.modalView}>
             <Text style={styles.headertitle}>Select a Time</Text>
-          </View>
-
-          <View style={styles.modalBody}>
             <View style={styles.row}>
-              <View style={styles.box}>
-                <TouchableOpacity
-                  style={styles.touchableOpacity}
-                  onPress={() => [
-                    setRecreationalmodalVisible(false),
-                    setCategory_time("recreational_am"),
-                  ]}
-                >
-                  <Image
-                    source={require("../../assets/am.png")}
-                    resizeMode="contain"
-                    style={styles.image}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.timestyle}>8:00am - 11:59am</Text>
-              </View>
-              <View style={styles.box}>
-                <TouchableOpacity
-                  style={styles.touchableOpacity}
-                  onPress={() => [
-                    setRecreationalmodalVisible(false),
-                    setCategory_time("recreational_pm"),
-                  ]}
-                >
-                  <Image
-                    source={require("../../assets/pm.png")}
-                    resizeMode="contain"
-                    style={styles.image}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.timestyle}>1:00pm - 5:00pm</Text>
-              </View>
+              {isamVisible && (
+                <View style={styles.box}>
+                  <TouchableOpacity
+                    style={styles.touchableOpacity}
+                    onPress={() => [
+                      setRecreationalmodalVisible(false),
+                      setCategory_time("recreational_am"),
+                    ]}
+                  >
+                    <Image
+                      source={require("../../assets/am.png")}
+                      resizeMode="contain"
+                      style={styles.image}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.timestyle}>8:00am - 11:59am</Text>
+                </View>
+              )}
+              {ispmVisible && (
+                <View style={styles.box}>
+                  <TouchableOpacity
+                    style={styles.touchableOpacity}
+                    onPress={() => [
+                      setRecreationalmodalVisible(false),
+                      setCategory_time("recreational_pm"),
+                    ]}
+                  >
+                    <Image
+                      source={require("../../assets/pm.png")}
+                      resizeMode="contain"
+                      style={styles.image}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.timestyle}>1:00pm - 5:00pm</Text>
+                </View>
+              )}
             </View>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setRecreationalmodalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Cancel</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setRecreationalmodalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -473,21 +706,18 @@ function ServiceProgressSteps(props) {
         animationType="fade"
         transparent={true}
         visible={servicesmodalVisible}
-        style={styles.modalView}
         onRequestClose={() => {
           setServicesmodalVisible(false);
         }}
       >
-        <View style={styles.centeredView2}>
-          <View style={styles.header}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
             <Text style={styles.headertitle}>Recreational Activities</Text>
-          </View>
-          <Text style={styles.description}>
-            Select a recreational activities you want to avail
-          </Text>
-          <Text style={styles.subdescription}>(Maximum of 3)</Text>
+            <Text style={styles.description}>
+              Select a recreational activities you want to avail
+            </Text>
+            <Text style={styles.subdescription}>(Maximum of 3)</Text>
 
-          <View style={styles.modalBodyServices}>
             <View style={styles.CheckboxContainer}>
               {/* Checkbox */}
               <View style={styles.Checkboxdetail}>
@@ -736,15 +966,14 @@ function ServiceProgressSteps(props) {
                 Proceed
               </Text>
             </TouchableOpacity>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setServicesmodalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Cancel</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setServicesmodalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -754,28 +983,107 @@ function ServiceProgressSteps(props) {
         animationType="fade"
         transparent={true}
         visible={multipurposemodalVisible}
-        style={styles.modalView}
         onRequestClose={() => {
           setMultipurposemodalVisible(false);
         }}
       >
         <View style={styles.centeredView}>
-          <View style={styles.header}>
+          <View style={styles.modalView}>
             <Text style={styles.headertitle}>Select a Time</Text>
-          </View>
-
-          <View style={styles.modalBody}>
             <ScrollView horizontal={true}>
               <View style={styles.row}>
                 {/* Row1 */}
+                {ismphamVisible && (
+                  <View style={styles.box} visible={false}>
+                    {/* Option1 */}
+                    <TouchableOpacity
+                      style={styles.touchableOpacity}
+                      onPress={() => [
+                        setMultipurposemodalVisible(false),
+                        setCategory_time("multipurpose_am"),
+                      ]}
+                    >
+                      <Image
+                        source={require("../../assets/am.png")}
+                        resizeMode="contain"
+                        style={styles.image}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.timestyle}>8:00am - 11:59am</Text>
+                  </View>
+                )}
+                {ismphpmVisible && (
+                  <View style={styles.box}>
+                    {/* Option2 */}
+                    <TouchableOpacity
+                      style={styles.touchableOpacity}
+                      onPress={() => [
+                        setMultipurposemodalVisible(false),
+                        setCategory_time("multipurpose_pm"),
+                      ]}
+                    >
+                      <Image
+                        source={require("../../assets/pm.png")}
+                        resizeMode="contain"
+                        style={styles.image}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.timestyle}>1:00pm - 5:00pm</Text>
+                  </View>
+                )}
+                {/* Row2 */}
+                {iswholedayVisible && (
+                  <View style={styles.box}>
+                    <TouchableOpacity
+                      style={styles.touchableOpacity}
+                      onPress={() => [
+                        setMultipurposemodalVisible(false),
+                        setCategory_time("multipurpose_wholeday"),
+                      ]}
+                    >
+                      <Image
+                        source={require("../../assets/whole_day.png")}
+                        resizeMode="contain"
+                        style={styles.image}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.timestyle}>Whole Day</Text>
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setMultipurposemodalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
+      {/* Dialysis */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={dialysismodalVisible}
+        onRequestClose={() => {
+          setDialysismodalVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.headertitle}>Select a Time</Text>
+            <View style={styles.row}>
+              {isamVisible && (
                 <View style={styles.box}>
-                  {/* Option1 */}
                   <TouchableOpacity
                     style={styles.touchableOpacity}
                     onPress={() => [
-                      setMultipurposemodalVisible(false),
-                      setCategory_time("multipurpose_am"),
+                      setDialysismodalVisible(false),
+                      setCategory_time("dialysis_am"),
                     ]}
                   >
                     <Image
@@ -786,14 +1094,14 @@ function ServiceProgressSteps(props) {
                   </TouchableOpacity>
                   <Text style={styles.timestyle}>8:00am - 11:59am</Text>
                 </View>
-
+              )}
+              {ispmVisible && (
                 <View style={styles.box}>
-                  {/* Option2 */}
                   <TouchableOpacity
                     style={styles.touchableOpacity}
                     onPress={() => [
-                      setMultipurposemodalVisible(false),
-                      setCategory_time("multipurpose_pm"),
+                      setDialysismodalVisible(false),
+                      setCategory_time("dialysis_pm"),
                     ]}
                   >
                     <Image
@@ -804,98 +1112,16 @@ function ServiceProgressSteps(props) {
                   </TouchableOpacity>
                   <Text style={styles.timestyle}>1:00pm - 5:00pm</Text>
                 </View>
-
-                {/* Row2 */}
-                <View style={styles.box}>
-                  <TouchableOpacity
-                    style={styles.touchableOpacity}
-                    onPress={() => [
-                      setMultipurposemodalVisible(false),
-                      setCategory_time("multipurpose_wholeday"),
-                    ]}
-                  >
-                    <Image
-                      source={require("../../assets/whole_day.png")}
-                      resizeMode="contain"
-                      style={styles.image}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.timestyle}>Whole Day</Text>
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setMultipurposemodalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Dialysis */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={dialysismodalVisible}
-        style={styles.modalView}
-        onRequestClose={() => {
-          setDialysismodalVisible(false);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.header}>
-            <Text style={styles.headertitle}>Select a Time</Text>
-          </View>
-
-          <View style={styles.modalBody}>
-            <View style={styles.row}>
-              <View style={styles.box}>
-                <TouchableOpacity
-                  style={styles.touchableOpacity}
-                  onPress={() => [
-                    setDialysismodalVisible(false),
-                    setCategory_time("dialysis_am"),
-                  ]}
-                >
-                  <Image
-                    source={require("../../assets/am.png")}
-                    resizeMode="contain"
-                    style={styles.image}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.timestyle}>8:00am - 11:59am</Text>
-              </View>
-              <View style={styles.box}>
-                <TouchableOpacity
-                  style={styles.touchableOpacity}
-                  onPress={() => [
-                    setDialysismodalVisible(false),
-                    setCategory_time("dialysis_pm"),
-                  ]}
-                >
-                  <Image
-                    source={require("../../assets/pm.png")}
-                    resizeMode="contain"
-                    style={styles.image}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.timestyle}>1:00pm - 5:00pm</Text>
-              </View>
+              )}
             </View>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setDialysismodalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Cancel</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setDialysismodalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -905,25 +1131,22 @@ function ServiceProgressSteps(props) {
         animationType="fade"
         transparent={true}
         visible={reqmodalVisible}
-        style={styles.modalView}
         onRequestClose={() => {
           setReqmodalVisible(false);
         }}
       >
-        <View style={styles.centeredViewReq}>
-          <View style={styles.header}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
             <Text style={styles.headertitle}>Dialysis Consultation</Text>
-          </View>
-          <View style={styles.subheaderReq}>
-            <Text style={styles.subheaderReqtext}>
-              Requirements for dialysis
-            </Text>
-            <Text style={styles.subheaderReqdesc}>
-              Ensure you have the necessary dialysis requirements to bring
-              before clicking the 'proceed.'
-            </Text>
-          </View>
-          <View style={styles.modalBody}>
+            <View style={styles.subheaderReq}>
+              <Text style={styles.subheaderReqtext}>
+                Requirements for dialysis
+              </Text>
+              <Text style={styles.subheaderReqdesc}>
+                Make sure you have the necessary dialysis requirements to bring
+                before clicking the 'proceed.'
+              </Text>
+            </View>
             <View style={{ marginBottom: 10 }}>
               <FlatList
                 data={[
@@ -971,15 +1194,14 @@ function ServiceProgressSteps(props) {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setReqmodalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Close</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setReqmodalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -989,21 +1211,18 @@ function ServiceProgressSteps(props) {
         animationType="fade"
         transparent={true}
         visible={mphmodalVisible}
-        style={styles.modalView}
         onRequestClose={() => {
           setMphmodalVisible(false);
         }}
       >
-        <View style={styles.centeredViewMph}>
-          <View style={styles.header}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
             <Text style={styles.headertitle}>Multipurpose Hall</Text>
-          </View>
-          <View style={styles.subheaderReq}>
-            <Text style={styles.subheaderMphtext}>
-              Please complete the required field(s) below
-            </Text>
-          </View>
-          <View style={styles.modalBody}>
+            <View style={styles.subheaderReq}>
+              <Text style={styles.subheaderMphtext}>
+                Please complete the required field(s) below
+              </Text>
+            </View>
             <View style={{ marginBottom: 10 }}>
               <TextInput
                 style={styles.input}
@@ -1032,18 +1251,58 @@ function ServiceProgressSteps(props) {
                 </TouchableOpacity>
               </View>
             </View>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setMphmodalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
+        </View>
+      </Modal>
 
-          <View style={styles.footer}>
+      {/* Remidner Modal*/}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isReminderVisible}
+        onRequestClose={() => {
+          setReminderVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Image
+              source={require("../../assets/reminder.gif")}
+              resizeMode="contain"
+              style={styles.imageReminder}
+            />
+            <Text style={styles.headerRemindertext}>Reminder</Text>
+            <Text style={styles.subheaderRemindertext}>
+              {"     "}Please cancel your booked schedule if you are unable to
+              attend the day before, or else it will be marked as not attended.
+              This helps us ensure that other users have the opportunity to book
+              that slot.
+            </Text>
+            <Text style={styles.subheaderRemindertext}>
+              {"     "}Please note that if you accumulate 5 not attended, you
+              will be restricted from booking for a period of 7 days.
+            </Text>
             <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setMphmodalVisible(false)]}
+              style={styles.closebuttonReminder}
+              onPress={() => [
+                setReminderVisible(false),
+                props.navigation.navigate("Schedules"),
+              ]}
             >
               <Text style={styles.closebuttonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
+
       <SuperAlert customStyle={customStyle} />
     </View>
   );
@@ -1078,7 +1337,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.main,
-    // height: windowheight,
     paddingTop: 40,
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1118,29 +1376,18 @@ const styles = StyleSheet.create({
   },
 
   centeredView: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    width: "90%",
-    // minHeight: 300,
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 10,
-    backgroundColor: Colors.main,
-    position: "absolute",
-    bottom: 250,
   },
-  centeredViewReq: {
-    alignItems: "center",
-    width: "90%",
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 10,
+
+  modalView: {
     backgroundColor: Colors.main,
-    position: "absolute",
-    bottom: 60,
+    borderRadius: 10,
+    width: windowWidth / 1.09,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: Colors.rose_200,
   },
   centeredViewMph: {
     alignItems: "center",
@@ -1171,30 +1418,15 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  centeredView2: {
-    alignItems: "center",
-    width: "90%",
-    // minHeight: 300,
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 10,
-    backgroundColor: Colors.main,
-    position: "absolute",
-    bottom: 150,
-  },
-  modalBodyServices: {
-    width: "100%",
-    alignItems: "center",
-  },
   proceedbutton: {
     width: "90%",
+    height: 50,
     margin: 10,
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 2.5,
     borderColor: Colors.red,
-    padding: 10,
+    alignSelf: "center",
+    justifyContent: "center",
   },
   proceedbuttonText: {
     color: Colors.TextColor,
@@ -1207,11 +1439,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     margin: 10,
+    textAlign: "center",
   },
   subdescription: {
     color: "black",
     fontSize: 14,
     margin: 5,
+    textAlign: "center",
   },
   CheckboxContainer: {
     width: "100%",
@@ -1232,11 +1466,21 @@ const styles = StyleSheet.create({
     height: 70,
     justifyContent: "center",
     alignItems: "center",
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
+
   headertitle: {
     fontSize: 18,
-    color: Colors.TextColor,
-    fontWeight: "500",
+    height: 50,
+    width: "100%",
+    color: Colors.TextWhite,
+    fontWeight: "bold",
+    backgroundColor: "#D03043",
+    textAlign: "center",
+    textAlignVertical: "center",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   closebutton: {
     backgroundColor: "#EF3A47",
@@ -1248,6 +1492,16 @@ const styles = StyleSheet.create({
     right: 0,
     margin: 10,
     padding: 10,
+  },
+  closebuttonReminder: {
+    backgroundColor: "#EF3A47",
+    borderWidth: 2,
+    borderRadius: 5,
+    borderColor: "#ff1717",
+    paddingVertical: 10,
+    padding: 10,
+    width: 70,
+    alignSelf: "center",
   },
   closebuttonText: {
     color: Colors.TextWhite,
@@ -1292,12 +1546,13 @@ const styles = StyleSheet.create({
     fontWeight: "300",
   },
   subheaderReq: {
-    width: "95%",
+    // width: "95%",
     height: 70,
     borderBottomWidth: 1,
     borderBottomColor: Colors.disabled,
     marginTop: 5,
     marginBottom: 5,
+    justifyContent: "center",
   },
   subheaderReqtext: {
     textAlign: "center",
@@ -1311,6 +1566,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  headerRemindertext: {
+    textAlign: "left",
+    color: "black",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  subheaderRemindertext: {
+    color: "black",
+    fontSize: 16,
+    margin: 10,
+    textAlign: "justify",
+  },
+
   subheaderReqdesc: {
     textAlign: "center",
   },
@@ -1342,6 +1611,10 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderWidth: 0,
     borderBottomWidth: 1,
+  },
+  imageReminder: {
+    width: "100%",
+    height: "50%",
   },
 });
 

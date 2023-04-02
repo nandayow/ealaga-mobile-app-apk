@@ -1,6 +1,13 @@
 import { useCallback, useContext, useState } from "react";
-import { Dimensions, StyleSheet, View, Text, ScrollView, SafeAreaView, StatusBar } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";  
+import {
+  Dimensions,
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Colors from "../../Shared/Color";
 import Header from "../../Shared/Header";
@@ -11,22 +18,16 @@ import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import baseURL from "../../assets/common/baseUrl";
-import { Platform } from "react-native"; 
- 
+
 // Dimension
 const windowHeight = Dimensions.get("window").height;
 
-const HomeContainer = (props,) => {
+const HomeContainer = (props) => {
   const context = useContext(AuthGlobal);
-  const [hours, setHours] = useState("");
-  const [greeting, setGreeting] = useState("Good Morning!");
-  const [username, setUserame] = useState("");
+  const [greeting, setGreeting] = useState("Good Morning!"); 
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
-
-  const oras = moment().hours(); //Current Hours
-
-  
+  const hours = moment().hours(); //Current Hours 
 
   useFocusEffect(
     useCallback(() => {
@@ -36,7 +37,15 @@ const HomeContainer = (props,) => {
       ) {
         props.navigation.navigate("User");
       }
-      // props.navigation.navigate.popToTop();
+
+      if (hours < 12) {
+        setGreeting("Good Morning!");
+      } else if (hours === 18 || hours > 18  ) {
+        setGreeting("Good Evening!");
+      } else {
+        setGreeting("Good Afternoon!");
+      }
+ 
       AsyncStorage.getItem("jwt")
         .then((res) => {
           axios
@@ -46,29 +55,19 @@ const HomeContainer = (props,) => {
                 headers: { Authorization: `Bearer ${res}` },
               }
             )
-            .then((userData) => [
-              setUserame(userData.data.user.user_name),
+            .then((userData) => [ 
               setFirstname(userData.data.user.first_name),
               setLastname(userData.data.user.last_name),
             ]);
         })
-        .catch((error) => console.log(error));
-
-      setHours(oras);
-      if (hours < 12) {
-        setGreeting("Good Morning!");
-      } else if (hours > 12 && hours < 18) {
-        setGreeting("Good Afternoon!");
-      } else {
-        setGreeting("Good Evening!");
-      } 
-  
+        .catch((error) => console.log(error)); 
+     
     }, [])
   );
-
+ 
   return (
-    <SafeAreaView style = {styles.homecontainer}> 
-      <Header/> 
+    <SafeAreaView style={styles.homecontainer}>
+      <Header />
       <View style={styles.container}>
         <Text style={styles.greeting}>{greeting}</Text>
         <Text style={styles.username}>
@@ -77,16 +76,14 @@ const HomeContainer = (props,) => {
         <ScrollView>
           <Features navigation={props.navigation} />
         </ScrollView>
-      </View> 
-    </SafeAreaView >
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   homecontainer: {
     flex: 1,
-    // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    // backgroundColor:Colors.red
   },
   container: {
     // width: windowWidth,
@@ -98,7 +95,7 @@ const styles = StyleSheet.create({
     color: Colors.TextColor,
     fontWeight: "bold",
     marginTop: 10,
-    marginLeft: 10, 
+    marginLeft: 10,
   },
   username: {
     fontSize: 24,

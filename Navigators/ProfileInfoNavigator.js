@@ -12,12 +12,12 @@ function MyTabs() {
       initialRouteName="Personal"
       screenOptions={{
         tabBarIndicatorStyle: { backgroundColor: "red" },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: "bold" },
+        tabBarLabelStyle: { fontWeight: "bold" },
         tabBarStyle: { backgroundColor: Colors.rose_200 },
         tabBarActiveTintColor: Colors.TextColor,
         tabBarInactiveTintColor: Colors.gray,
-        tabBarPressColor: Colors.main, 
-        swipeEnabled:false, 
+        tabBarPressColor: Colors.main,
+        swipeEnabled: false,
       }}
     >
       <Tab.Screen name="Personal" component={Personal} screenOptions />

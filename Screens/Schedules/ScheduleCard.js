@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
   PermissionsAndroid,
-  Platform, 
+  Platform,
 } from "react-native";
 import { Card } from "react-native-paper";
 import moment from "moment";
@@ -32,16 +32,17 @@ import Spinner from "react-native-loading-spinner-overlay/lib";
 
 // Saving Image Trial
 
-import ViewShot from "react-native-view-shot"; 
+import ViewShot from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
 // Dimensions
 const windowheight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get("window").width;
 
 function ScheduleCard(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [userProfile, setUserProfile] = useState();
   const context = useContext(AuthGlobal);
-  const [scheduleId, setScheduleId] = useState(); 
+  const [scheduleId, setScheduleId] = useState();
   const [token, setToken] = useState();
   const [refresh, setRefresh] = useState(false);
   const [status, setstatus] = useState("Reserved");
@@ -49,7 +50,7 @@ function ScheduleCard(props) {
   const [service, setService] = useState();
   const [scheduleDate, setScheduleDate] = useState();
   const [scheduleTime, setScheduleTime] = useState();
- 
+  const [recreational_services, setrecreational_services] = useState();
   const [loading, setLoading] = useState(false);
 
   useFocusEffect(
@@ -60,7 +61,7 @@ function ScheduleCard(props) {
       ) {
         props.navigation.navigate("User");
       }
-
+      setLoading(true);
       AsyncStorage.getItem("jwt")
         .then((res) => {
           axios
@@ -70,7 +71,11 @@ function ScheduleCard(props) {
                 headers: { Authorization: `Bearer ${res}` },
               }
             )
-            .then((user) => setUserProfile(user.data), setToken(res));
+            .then((user) => [
+              setUserProfile(user.data),
+              setToken(res),
+              setLoading(false),
+            ]);
         })
         .catch((error) => console.log(error));
     }, [])
@@ -80,7 +85,7 @@ function ScheduleCard(props) {
   const schedules = userProfile && userProfile.filter;
 
   const pullMe = () => {
-    setRefresh(true);
+    setLoading(true);
     AsyncStorage.getItem("jwt.")
       .then((res) => {
         axios
@@ -90,7 +95,7 @@ function ScheduleCard(props) {
           .then((user) => setUserProfile(user.data), setToken(res));
 
         setTimeout(() => {
-          setRefresh(false);
+          setLoading(false);
         }, 500);
       })
       .catch((error) => console.log(error));
@@ -113,9 +118,6 @@ function ScheduleCard(props) {
             text2: "Great!",
           });
           setLoading(false);
-          // setTimeout(() => {
-          //   props.navigation.navigate("Schedules");
-          // }, 500);
         }
       })
       .catch(() => {
@@ -207,7 +209,7 @@ function ScheduleCard(props) {
   };
 
   return (
-    <View style={styles} >
+    <View>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refresh} onRefresh={() => pullMe()} />
@@ -223,9 +225,9 @@ function ScheduleCard(props) {
         />
         <View style={styles.container}>
           {userProfile && userProfile.filter.length > 0 ? (
-            schedules.map((schedule ,i) => {
+            schedules.map((schedule, i) => { 
               return (
-                <Card style={styles.card} key = {i}>
+                <Card style={styles.card} key={i}>
                   <Image
                     source={
                       schedule.category === "Recreational Activity"
@@ -288,10 +290,15 @@ function ScheduleCard(props) {
                           schedule.qr_code.map((qr) => {
                             setqrImage(qr.url);
                           }),
+                        setrecreational_services(
+                          schedule.recreational_services
+                        ),
                       ]}
                     >
-                      <Icon name="eye" style={styles.iconStar} size={20} />
-                      <Text style={styles.iconlabel}>View</Text>
+                      <Icon name="eye" style={styles.iconStar} size={20}>
+                        {" "}
+                        View
+                      </Icon>
                     </TouchableOpacity>
                   </View>
                 </Card>
@@ -304,26 +311,31 @@ function ScheduleCard(props) {
           )}
         </View>
       </ScrollView>
+      <SuperAlert customStyle={customStyle} />
 
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.header}>
-            <Text style={styles.headertitle}>DETAILS</Text>
-          </View>
+      <View style={styles.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.headertitle}>DETAILS</Text>
 
-          <View style={styles.modalBody}>
-            <ViewShot style={styles.qrContainer} ref={cardRef}>
-              <View style={styles.qrContainerinside}>
-                <View style={styles.inputWrap}>
+              <ViewShot style={styles.qrcontainer} ref={cardRef}>
+                <View style={styles.column}>
+                  {/* Content for first column */}
                   <Text style={styles.label}>Service Type</Text>
                   <Text style={styles.qrDescription}>{service}</Text>
+                  {service === "Recreational Activity" ? (
+                    <Text style={styles.serviceDescription}>
+                      {"→" + recreational_services}
+                    </Text>
+                  ) : null}
                   <Text style={styles.label}>Date and Time</Text>
                   <Text style={styles.qrDescription}>{scheduleDate}</Text>
                   {scheduleTime === "am" ? (
@@ -352,8 +364,10 @@ function ScheduleCard(props) {
                     />
                   </View>
                 </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.labelcode}> Qr Code</Text>
+                <View style={styles.column}>
+                  {/* Content for second column */}
+                  <Text style={styles.labelcode}> QR_ID</Text>
+                  <Text style={styles.qrDescription}>{scheduleId}</Text>
                   <Image
                     source={{ uri: qrImage }}
                     resizeMode="cover"
@@ -364,48 +378,41 @@ function ScheduleCard(props) {
                     be able to avail the services without this.
                   </Text>
                 </View>
+              </ViewShot>
+
+              <TouchableOpacity
+                style={styles.saveImageSubmit}
+                onPress={() => {
+                  saveAsImage();
+                }}
+              >
+                <Text style={styles.saveImage}>Save Image</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.CancelSubmit}
+                // title="Show dialog"
+                onPress={handleDelete}
+              >
+                <Text style={styles.cancelButton}>Cancel Schedule</Text>
+              </TouchableOpacity>
+
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.closebutton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.closebuttonText}>Close</Text>
+                </TouchableOpacity>
               </View>
-            </ViewShot>
+            </View>
           </View>
-
-          <TouchableOpacity
-            style={styles.saveImageSubmit}
-            // onPress={() => {
-            //   saveAsImage();
-            // }}
-
-            onPress={() => {
-              saveAsImage();
-            }}
-          >
-            <Text style={styles.saveImage}>Save Image</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.CancelSubmit}
-            // title="Show dialog"
-            onPress={handleDelete}
-          >
-            <Text style={styles.cancelButton}>Cancel Schedule</Text>
-          </TouchableOpacity>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closebuttonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <SuperAlert customStyle={customStyle} />
+        </Modal>
+      </View>
     </View>
   );
 }
 const customStyle = {
- 
   container: {
     backgroundColor: Colors.main,
     borderRadius: 10,
@@ -438,17 +445,17 @@ const customStyle = {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center", 
-    marginBottom:50
+    alignItems: "center",
+    marginBottom: 50,
   },
   card: {
     backgroundColor: Colors.light,
-    width: "90%",
-    height: 250,
-    margin: 10,
+    width: windowWidth / 1.1,
+    height: "auto",
+    marginBottom: 10,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: "#c5c5c5",
+    borderColor: Colors.rose_200,
     elevation: 2,
     padding: 10,
   },
@@ -490,62 +497,48 @@ const styles = StyleSheet.create({
   iconStar: {
     color: Colors.TextColor,
     backgroundColor: Colors.light,
-  },
-  iconlabel: {
-    fontSize: 16,
+    fontSize: 18,
     fontStyle: "normal",
-    position: "absolute",
-    right: 10,
-    color: "red",
-    fontWeight: "900",
-    backgroundColor: Colors.light,
   },
   centeredView: {
-    alignItems: "center",
-    marginTop: 50,
-    marginBottom: 10,
-    width: "90%",
-    minHeight: 600,
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 5,
-    backgroundColor: Colors.main,
-  },
-  header: {
-    backgroundColor: "#D03043",
-    width: "100%",
-    height: 50,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 22,
   },
-  modalBody: {
-    flex: 1,
-    // backgroundColor:Colors.red,
-    width: "100%",
-    alignItems: "center",
-  },
-  qrContainer: {
-    flex: 1,
+
+  modalView: {
     backgroundColor: Colors.main,
+    borderRadius: 10,
+    width: windowWidth / 1.09,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: Colors.rose_200,
+  },
+  headertitle: {
+    fontSize: 18,
+    height: 50,
+    width: "100%",
+    color: Colors.TextWhite,
+    fontWeight: "bold",
+    backgroundColor: "#D03043",
+    textAlign: "center",
+    textAlignVertical: "center",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+
+  qrcontainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    // height:200,
-    paddingLeft: 5,
-    height: "90%",
     borderWidth: 1,
     borderColor: "black",
     margin: 5,
-    paddingTop: 10,
+    backgroundColor: Colors.main,
   },
-  qrContainerinside: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    paddingTop: 10,
+  column: {
+    flex: 1,
   },
   label: {
-    // flex: 1,
     fontWeight: "bold",
     color: Colors.TextColor,
     fontSize: 17,
@@ -568,6 +561,10 @@ const styles = StyleSheet.create({
     // flex: 1,
     fontSize: 15,
     fontWeight: "bold",
+    marginBottom: 5,
+  },
+  serviceDescription: {
+    fontSize: 12,
     marginBottom: 5,
   },
   qrImahe: {
@@ -594,11 +591,8 @@ const styles = StyleSheet.create({
     height: 70,
     justifyContent: "center",
     alignItems: "center",
-  },
-  headertitle: {
-    fontSize: 18,
-    color: Colors.TextWhite,
-    fontWeight: "500",
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   closebutton: {
     backgroundColor: "#EF3A47",
@@ -683,6 +677,7 @@ const styles = StyleSheet.create({
     margin: 2,
     padding: 10,
     width: "90%",
+    alignSelf: "center",
   },
   saveImageSubmit: {
     backgroundColor: Colors.main,
@@ -693,15 +688,12 @@ const styles = StyleSheet.create({
     margin: 2,
     padding: 10,
     width: "90%",
+    alignSelf: "center",
   },
   viewButton: {
     width: 90,
-    borderWidth: 1.5,
-    borderColor: "red",
     position: "absolute",
     right: 0,
-    bottom: 5,
-    padding: 10,
     justifyContent: "center",
     borderRadius: 5,
   },

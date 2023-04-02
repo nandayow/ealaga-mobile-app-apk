@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -21,7 +21,7 @@ import SuperAlert from "react-native-super-alert";
 
 // Dimensions
 const windowWidth = Dimensions.get("window").width;
-const windowheight = Dimensions.get("window").height;
+const windowHeight = Dimensions.get("window").height;
 
 function FunctionList(props) {
   const [userProfile, setUserProfile] = useState();
@@ -68,7 +68,7 @@ function FunctionList(props) {
     if (status !== undefined) {
       setModalVisibLoading(true);
       setTimeout(() => {
-         setModalVisibLoading(false);
+        setModalVisibLoading(false);
         userProfile && userProfile.user.account_verified === "pending"
           ? setModalVisible(true)
           : userProfile && userProfile.user.account_verified === "not verified"
@@ -152,10 +152,10 @@ function FunctionList(props) {
         }}
       >
         <View style={styles.centeredView}>
-          <View style={styles.modalBody}>
+          <View style={styles.modalView}>
             <Image
               source={require("../../assets/loading.gif")}
-              resizeMode="contain"
+              resizeMode="cover"
               style={styles.image}
             />
             <Text style={styles.headertitle1}>
@@ -175,8 +175,8 @@ function FunctionList(props) {
           setModalVisible(false);
         }}
       >
-        <View style={styles.centeredViewPending}>
-          <View style={styles.modalBody}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
             <Image
               source={require("../../assets/pending.gif")}
               resizeMode="contain"
@@ -186,15 +186,14 @@ function FunctionList(props) {
             <Text style={styles.subheader}>
               Your account verification is currently being reviewed by our team.
             </Text>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setModalVisible(false)]}
-            >
-              <Text style={styles.closebuttonText}>Ok</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setModalVisible(false)]}
+              >
+                <Text style={styles.closebuttonText}>Ok</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -209,8 +208,8 @@ function FunctionList(props) {
           setModalVisible2(false);
         }}
       >
-        <View style={styles.centeredViewPending}>
-          <View style={styles.modalBody}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
             <Image
               source={require("../../assets/not_verified.gif")}
               resizeMode="contain"
@@ -221,20 +220,19 @@ function FunctionList(props) {
               To access our services, please visit your profile, click the
               "Verify" button, and complete all required information.
             </Text>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setModalVisible2(false)]}
-            >
-              <Text style={styles.closebuttonText}>Ok</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setModalVisible2(false)]}
+              >
+                <Text style={styles.closebuttonText}>Ok</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
 
-      {/* Not Active */}
+      {/* Restricted */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -244,8 +242,8 @@ function FunctionList(props) {
           setModalVisibStatus(false);
         }}
       >
-        <View style={styles.centeredViewPending}>
-          <View style={styles.modalBody}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
             <Image
               source={require("../../assets/restricted.gif")}
               resizeMode="contain"
@@ -259,15 +257,14 @@ function FunctionList(props) {
               restricted due to repeated instances of not attending to your
               bookings.
             </Text>
-          </View>
-
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.closebutton}
-              onPress={() => [setModalVisibStatus(false)]}
-            >
-              <Text style={styles.closebuttonText}>Ok</Text>
-            </TouchableOpacity>
+            <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.closebutton}
+                onPress={() => [setModalVisibStatus(false)]}
+              >
+                <Text style={styles.closebuttonText}>Ok</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -279,7 +276,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.main,
-    height: windowheight - 50,
+    height: windowHeight - 50,
     paddingTop: 40,
     flexDirection: "row",
     flexWrap: "wrap",
@@ -306,7 +303,7 @@ const styles = StyleSheet.create({
   title: {
     color: Colors.gray,
     position: "absolute",
-    bottom: 10, 
+    bottom: 10,
     alignSelf: "center",
     marginBottom: 5,
     fontSize: 24,
@@ -318,49 +315,25 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   centeredView: {
-    alignItems: "center",
-    width: "90%",
-    // minHeight: 300,
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 10,
-    backgroundColor: Colors.main,
-    position: "absolute",
-    bottom: 200,
-  },
-  centeredViewPending: {
-    alignItems: "center",
-    width: "90%",
-    // minHeight: 300,
-    alignSelf: "center",
-    elevation: 20,
-    borderColor: "#c5c5c5",
-    borderWidth: 1,
-    borderRadius: 10,
-    backgroundColor: Colors.main,
-    position: "absolute",
-    bottom: 140,
-  },
-  header: {
-    backgroundColor: "#ffbaba80",
-    width: "100%",
-    height: 70,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 50,
+    marginBottom: 50,
   },
+  modalView: {
+    backgroundColor: Colors.main,
+    borderRadius: 10,
+    width: windowWidth / 1.09,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: Colors.rose_200,
+  },  
   subheader: {
     textAlign: "center",
     color: Colors.gray,
     fontSize: 18,
     marginBottom: 20,
-  },
-
-  modalBody: {
-    flex: 1,
-    width: "100%",
-    alignItems: "center",
   },
   footer: {
     backgroundColor: Colors.main,
@@ -375,11 +348,11 @@ const styles = StyleSheet.create({
     color: Colors.warning,
     fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
   },
   headertitle1: {
     fontSize: 20,
     color: Colors.gray,
-    // fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
   },
@@ -388,10 +361,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 5,
     borderColor: "#ff1717",
-    paddingVertical: 10,
-    // position: "absolute",
-    // right: 0,
-    // margin: 10,
+    paddingVertical: 10, 
     padding: 10,
     width: 70,
   },

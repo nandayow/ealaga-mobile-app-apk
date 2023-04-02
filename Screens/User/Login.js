@@ -3,8 +3,7 @@ import { Dimensions, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { TextInput } from "react-native-paper";
 import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Spinner from "react-native-loading-spinner-overlay/lib";
-
+import Spinner from "react-native-loading-spinner-overlay/lib"; 
 // Shared
 import Colors from "../../Shared/Color";
 import FormContainer from "../../Shared/Form/FormContainer";
@@ -18,11 +17,7 @@ const windowHeight = Dimensions.get("window").height;
 
 // Context
 import AuthGlobal from "../../Context/store/AuthGlobal";
-import {
-  loginUser,
-  setLoadingspinner,
-} from "../../Context/actions/Auth.actions"; 
-import { StatusBar } from "react-native";
+import { loginUser } from "../../Context/actions/Auth.actions";
 
 function LoginContainer(props) {
   const context = useContext(AuthGlobal);
@@ -31,48 +26,31 @@ function LoginContainer(props) {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     if (context.stateUser.isAuthenticated === true) {
       props.navigation.navigate("Home");
-      setLoading(false);
     }
   }, []);
 
   const handleSubmit = () => {
-    setLoading(true);
     const user = {
       email,
       password,
     };
-    if (email === "" || password === "") {
-      setError("Please fill correct email and password");
-      setTimeout(() => {
-        setError("");
-        setLoading(false);
-      }, 1000);
-    } else {
-      try {
-        loginUser(user, context.dispatch);
-        let isloading = setLoadingspinner(loading);
-        let loadingstatus = isloading.isLoading;
-        setTimeout(() => { 
-          setLoading(loadingstatus);
-        }, 1500);
-       
-      } catch (error) {
-        setLoading(loadingstatus);
-      }
-    }
-  };
 
+    if (email === "" || password === "") {
+      setError("Please provide correct email and password");
+      setLoading(false);
+    } else {
+      setError();
+      loginUser(user, context.dispatch);
+    }
+  }; 
   return (
     <SafeAreaProvider style={[styles.safeprovider]}>
       <Header navigation={props.navigation} />
-
       <Spinner
-        //visibility of Overlay Loading Spinner
-        visible={loading}
+        visible={context.stateUser.isLoading && context.stateUser.isLoading}
         //Text with the Spinner
         textContent={"Loading..."}
         //Text style of the Spinner Text
@@ -82,6 +60,7 @@ function LoginContainer(props) {
         <FormContainer title={"Login"}>
           <TextInput
             style={[styles.input]}
+            theme={{ colors: { primary: Colors.main } }}
             left={
               <TextInput.Icon
                 icon={require("../../assets/avatar.png")}
@@ -95,10 +74,11 @@ function LoginContainer(props) {
             name={"email"}
             id={"email"}
             value={email}
-            onChangeText={(text) => setEmail(text.toLowerCase())}
+            onChangeText={(text) => setEmail(text)}
           />
           <TextInput
             style={[styles.input]}
+            theme={{ colors: { primary: Colors.main } }}
             left={
               <TextInput.Icon
                 icon="lock"
@@ -139,7 +119,7 @@ function LoginContainer(props) {
             <EasyButton
               large
               style={styles.ButtonBorder}
-              onPress={() => handleSubmit()}
+              onPress={handleSubmit}
             >
               <Text style={styles.ButtonText}>LOG IN</Text>
             </EasyButton>
@@ -166,7 +146,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: windowHeight,
     width: windowWidth,
-    // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     backgroundColor: Colors.main,
   },
 
