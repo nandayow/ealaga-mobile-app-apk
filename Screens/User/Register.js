@@ -115,35 +115,35 @@ function Register(props) {
 
       <FormContainer title={"Register"}>
         <Input
-          placeholder={"Firstname"}
+          placeholder={"Firstname *"}
           name={"first_name"}
           id={"first_name"}
           value={first_name}
           onChangeText={(text) => setFirstname(text)}
         />
         <Input
-          placeholder={"Middlename"}
+          placeholder={"Middlename *"}
           name={"middle_name"}
           id={"middle_name"}
           value={middle_name}
           onChangeText={(text) => setMiddlename(text)}
         />
         <Input
-          placeholder={"Lastname"}
+          placeholder={"Lastname *"}
           name={"last_name"}
           id={"last_name"}
           value={last_name}
           onChangeText={(text) => setLastname(text)}
         />
         <Input
-          placeholder={"Email address"}
+          placeholder={"Email address *"}
           name={"email"}
           id={"email"}
           value={email}
           onChangeText={(text) => setEmail(text)}
         />
         <Input
-          placeholder={"Username"}
+          placeholder={"Username *"}
           name={"user_name"}
           id={"user_name"}
           value={user_name}
@@ -152,7 +152,7 @@ function Register(props) {
 
         <TextInput
           style={[styles.input]}
-          placeholder={"Password"}
+          placeholder={"Password *"}
           name={"password"}
           id={"password"}
           secureTextEntry={passwordVisible}
@@ -173,7 +173,7 @@ function Register(props) {
         />
         <TextInput
           style={[styles.input]}
-          placeholder={"Confirm password"}
+          placeholder={"Confirm password *"}
           name={"confirmPassword"}
           id={"confirmPassword"}
           secureTextEntry={passwordVisibleConfirm}

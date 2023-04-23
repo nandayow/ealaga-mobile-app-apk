@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  Dimensions,
-  RefreshControl,
-  ScrollView,
+  Dimensions, 
   StyleSheet,
   Text,
   View,
@@ -12,9 +10,7 @@ import {
 import Header from "../../Shared/Header";
 import HistoryCard from "./HistoryCard";
 import Colors from "../../Shared/Color";
-import { SafeAreaView } from "react-native";
-import { Platform } from "react-native";
-import { StatusBar } from "react-native";
+import { SafeAreaView } from "react-native"; 
 
 // Dimensions
 const windowWidth = Dimensions.get("window").width;
@@ -34,9 +30,7 @@ const HistoryContainer = (props) => {
 
 const styles = StyleSheet.create({
   homecontainer: {
-    flex: 1,
-    // paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    // backgroundColor: Colors.main,
+    flex: 1, 
   },
   container: {
     height: windowHeight,

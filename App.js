@@ -11,7 +11,7 @@ import store from "./Redux/store";
 // Context API
 import Auth from "./Context/store/Auth";
 import MainNavigator from "./Navigators/MainNavigator";
-import Colors from "./Shared/Color";
+import Colors from "./Shared/Color"; 
 
 // Navigators
 
@@ -26,6 +26,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
+ 
   // Eg. schedule the notification
   Notifications.scheduleNotificationAsync({
     content: {
@@ -45,6 +46,7 @@ export default function App() {
     },
   });
 
+
   return (
     <Auth>
       <Provider store={store}>
@@ -53,7 +55,7 @@ export default function App() {
             backgroundColor={Colors.main}
             barStyle="dark-content"
             translucent={false}
-            hidden={false}  
+            hidden={false}
           />
           <NavigationContainer>
             <MainNavigator />
